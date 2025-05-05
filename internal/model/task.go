@@ -8,5 +8,5 @@ type Task struct {
 	TaskKey     string `gorm:"uniqueIndex;size:32"`
 	Name        string `gorm:"size:250"`
 	Description string `gorm:"size:500"`
-	Logs        []Log
+	Logs        []Log  `gorm:"foreignKey:TaskID"`
 }

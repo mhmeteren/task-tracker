@@ -25,5 +25,8 @@ func LoadConfig() {
 	Cfg = Config{
 		AppEnv:     env,
 		ServerPort: os.Getenv("SERVER_PORT"),
+		Database: Database{
+			SQLDBUrl: os.Getenv("SQL_DATABASE_URL"),
+		},
 	}
 }
