@@ -3,9 +3,8 @@ package database
 import (
 	"log"
 	"task-tracker/internal/model"
+	"task-tracker/internal/util"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 func AutoMigrateAndSeed() {
@@ -49,13 +48,18 @@ func userSeed() {
 	DB.Model(&model.User{}).Count(&count)
 
 	if count == 0 {
+
+		hashedPassword, err := util.HashPassword("tasktracker")
+		if err != nil {
+			log.Println("[SEED] User seed sırasında hata:", err)
+		}
+
 		user := model.User{
-			Model:                 gorm.Model{ID: 1},
 			Name:                  "Admin User",
 			Email:                 "admin@example.com",
-			Password:              "hashed_password", // [NOTE] Burayı user register işleminde düzelt
-			UserKey:               "",                // [NOTE] Burayı uuidkey ile user register işleminde düzelt
-			RefreshToken:          "dummy_refresh_token",
+			Password:              hashedPassword,
+			UserKey:               "",
+			RefreshToken:          "",
 			RefreshTokenExpiresAt: time.Now().AddDate(-1, 0, 0),
 			RoleID:                1,
 		}
