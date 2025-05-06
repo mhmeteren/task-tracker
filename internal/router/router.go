@@ -1,0 +1,12 @@
+package router
+
+import (
+	"task-tracker/internal/di"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+func AppRoute(app *fiber.App, container *di.Container) {
+	api := app.Group("/api")
+	RegisterUserRoutes(api, container.UserController)
+}
