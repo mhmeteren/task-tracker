@@ -11,6 +11,7 @@ import (
 type Container struct {
 	UserController *controller.UserController
 	AuthController *controller.AuthController
+	TaskController *controller.TaskController
 }
 
 func InitContainer(db *gorm.DB) *Container {
@@ -23,8 +24,14 @@ func InitContainer(db *gorm.DB) *Container {
 	authService := service.NewAuthService(userRepo)
 	authController := controller.NewAuthController(authService)
 
+	//Task
+	taskRepo := repository.NewTaskRepository(db)
+	taskService := service.NewTaskService(taskRepo)
+	taskController := controller.NewTaskController(taskService)
+
 	return &Container{
 		UserController: userController,
 		AuthController: authController,
+		TaskController: taskController,
 	}
 }
