@@ -9,6 +9,7 @@ import (
 type TaskRepository interface {
 	GetAllByUser(userID uint) ([]model.Task, error)
 	FindByID(id uint) (*model.Task, error)
+	FindBySecretKey(taskKey string) (*model.Task, error)
 
 	Create(task *model.Task) error
 	Update(task *model.Task) error
@@ -36,6 +37,12 @@ func (r *taskRepository) FindByID(id uint) (*model.Task, error) {
 		return nil, err
 	}
 	return &task, nil
+}
+
+func (r *taskRepository) FindBySecretKey(taskKey string) (*model.Task, error) {
+	var task model.Task
+	err := r.db.Where("task_key = ?", taskKey).First(&task).Error
+	return &task, err
 }
 
 func (r *taskRepository) Create(task *model.Task) error {
