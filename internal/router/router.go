@@ -9,4 +9,5 @@ import (
 func AppRoute(app *fiber.App, container *di.Container) {
 	api := app.Group("/api")
 	RegisterUserRoutes(api, container.UserController)
+	RegisterAuthRoutes(api, container.AuthController)
 }
