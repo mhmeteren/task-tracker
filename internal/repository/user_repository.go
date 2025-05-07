@@ -15,6 +15,7 @@ type UserRepository interface {
 	FindByEmail(email string) (*model.User, error)
 	FindByEmailWithRole(email string) (*model.User, error)
 	FindByTokenWithRole(token string) (*model.User, error)
+	FindBySecretKey(user_key string) (*model.User, error)
 }
 
 type userRepository struct {
@@ -70,5 +71,11 @@ func (r *userRepository) FindByEmailWithRole(email string) (*model.User, error) 
 func (r *userRepository) FindByTokenWithRole(token string) (*model.User, error) {
 	var user model.User
 	err := r.db.Preload("Role").Where("refresh_token = ?", token).First(&user).Error
+	return &user, err
+}
+
+func (r *userRepository) FindBySecretKey(user_key string) (*model.User, error) {
+	var user model.User
+	err := r.db.Where("user_key = ?", user_key).First(&user).Error
 	return &user, err
 }
