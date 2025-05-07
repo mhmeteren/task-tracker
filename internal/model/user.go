@@ -12,7 +12,7 @@ type User struct {
 	Email                 string `gorm:"uniqueIndex;not null"`
 	Password              string `gorm:"not null"`
 	UserKey               string `gorm:"uniqueIndex;size:10"`
-	RefreshToken          string
+	RefreshToken          string `gorm:"uniqueIndex"`
 	RefreshTokenExpiresAt time.Time
 	RoleID                uint
 	Role                  Role   `gorm:"foreignKey:RoleID"`

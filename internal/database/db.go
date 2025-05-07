@@ -22,7 +22,7 @@ func InitDB() {
 			sqlDB, sqlErr := db.DB()
 			if sqlErr == nil {
 				if pingErr := sqlDB.Ping(); pingErr == nil {
-					log.Printf("[DB] Bağlantı başarılı (deneme %d).", attempts)
+					log.Printf("[DB] Connection successful (attempt %d).", attempts)
 					break
 				} else {
 					err = pingErr
@@ -32,14 +32,14 @@ func InitDB() {
 			}
 		}
 
-		log.Printf("[DB] Bağlantı denemesi %d başarısız: %v", attempts, err)
+		log.Printf("[DB] Connection attempt %d failed: %v", attempts, err)
 		time.Sleep(2 * time.Second)
 	}
 
 	if err != nil {
-		log.Panicf("[DB] PostgreSQL bağlantısı başarısız: %v", err)
+		log.Panicf("[DB] PostgreSQL connection failed: %v", err)
 	}
 
 	DB = db
-	log.Println("[DB] PostgreSQL bağlantısı başarılı.")
+	log.Println("[DB] PostgreSQL connection established successfully.")
 }
