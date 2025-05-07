@@ -59,7 +59,7 @@ func userSeed() {
 			Email:                 "admin@example.com",
 			Password:              hashedPassword,
 			UserKey:               "",
-			RefreshToken:          "",
+			RefreshToken:          nil,
 			RefreshTokenExpiresAt: time.Now().AddDate(-1, 0, 0),
 			RoleID:                1,
 		}
