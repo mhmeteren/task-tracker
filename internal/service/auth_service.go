@@ -68,7 +68,8 @@ func (service *authService) createAndSaveTokens(user *model.User) (*dto.AuthResp
 		return nil, err
 	}
 
-	user.RefreshToken = util.HashToken(refreshToken)
+	hashToken := util.HashToken(refreshToken)
+	user.RefreshToken = &hashToken
 	user.RefreshTokenExpiresAt = expiry
 	service.userRepo.Update(user)
 

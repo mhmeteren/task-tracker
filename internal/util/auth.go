@@ -24,6 +24,12 @@ func GenerateJWT(userID uint, roleName string) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
+func ParseJWT(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+}
+
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err

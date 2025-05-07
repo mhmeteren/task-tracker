@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"task-tracker/internal/model"
 	"task-tracker/internal/repository"
 	"task-tracker/internal/util"
@@ -16,6 +15,7 @@ type UserService interface {
 	Create(user *model.User, plainPassword string) error
 	Update(user *model.User) error
 	Delete(id uint) error
+	GetUserByIdCheckAndExists(userID uint) (*model.User, error)
 }
 
 type userService struct {
@@ -43,9 +43,9 @@ func (s *userService) GetByEmailWithRole(email string) (*model.User, error) {
 }
 
 func (s *userService) GetProfile(userID uint) (*model.User, error) {
-	user, err := s.repo.FindByID(userID)
+	user, err := s.GetUserByIdCheckAndExists(userID)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return nil, err
 	}
 	return user, nil
 }
@@ -71,4 +71,12 @@ func (s *userService) Update(user *model.User) error {
 
 func (s *userService) Delete(id uint) error {
 	return s.repo.Delete(id)
+}
+
+func (s *userService) GetUserByIdCheckAndExists(userID uint) (*model.User, error) {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil, &util.NotFoundError{Message: "user not found"}
+	}
+	return user, nil
 }
