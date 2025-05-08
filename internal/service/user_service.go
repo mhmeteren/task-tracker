@@ -11,7 +11,6 @@ type UserService interface {
 	GetByID(id uint) (*model.User, error)
 	GetByEmail(email string) (*model.User, error)
 	GetByEmailWithRole(email string) (*model.User, error)
-	FindBySecretKey(user_key string) (*model.User, error)
 	GetProfile(userID uint) (*model.User, error)
 	Create(user *model.User, plainPassword string) error
 	Update(user *model.User) error
@@ -43,10 +42,6 @@ func (s *userService) GetByEmailWithRole(email string) (*model.User, error) {
 	return s.repo.FindByEmailWithRole(email)
 }
 
-func (s *userService) FindBySecretKey(user_key string) (*model.User, error) {
-	return s.repo.FindBySecretKey(user_key)
-}
-
 func (s *userService) GetProfile(userID uint) (*model.User, error) {
 	user, err := s.GetUserByIdCheckAndExists(userID)
 	if err != nil {
@@ -62,7 +57,6 @@ func (s *userService) Create(user *model.User, plainPassword string) error {
 	}
 	user.Password = hashedPassword
 	user.RoleID = 2 // user
-	user.UserKey = util.GenerateKey(10)
 
 	if err := s.repo.Create(user); err != nil {
 		return err

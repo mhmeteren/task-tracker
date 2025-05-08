@@ -9,7 +9,7 @@ import (
 type TaskService interface {
 	GetAllByUser(userID uint) ([]model.Task, error)
 	GetTaskByIdAndUserCheckAndExists(id uint, userID uint) (*model.Task, error)
-	GetTaskBySecretKeyAndUserCheckAndExists(taskKey string, userID uint) (*model.Task, error)
+	GetTaskByKeysCheckAndExists(taskKey, taskSecret string) (*model.Task, error)
 
 	CreateNewTask(task *model.Task) error
 	Update(task *model.Task) error
@@ -30,6 +30,7 @@ func (service *taskService) GetAllByUser(userID uint) ([]model.Task, error) {
 
 func (service *taskService) CreateNewTask(task *model.Task) error {
 	task.TaskKey = util.GenerateKey(10)
+	task.TaskSecret = util.GenerateKey(10)
 	return service.repo.Create(task)
 }
 
@@ -50,9 +51,9 @@ func (s *taskService) GetTaskByIdAndUserCheckAndExists(id uint, userID uint) (*m
 	return task, nil
 }
 
-func (s *taskService) GetTaskBySecretKeyAndUserCheckAndExists(taskKey string, userID uint) (*model.Task, error) {
-	task, err := s.repo.FindBySecretKey(taskKey)
-	if err != nil || userID != task.UserID {
+func (s *taskService) GetTaskByKeysCheckAndExists(taskKey, taskSecret string) (*model.Task, error) {
+	task, err := s.repo.FindBySecretKey(taskKey, taskSecret)
+	if err != nil {
 		return nil, &util.NotFoundError{Message: "Task not found"}
 	}
 

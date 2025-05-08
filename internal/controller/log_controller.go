@@ -15,15 +15,13 @@ import (
 
 type LogController struct {
 	service     service.LogService
-	userService service.UserService
 	taskService service.TaskService
 }
 
 func NewLogController(
 	service service.LogService,
-	userService service.UserService,
 	taskService service.TaskService) *LogController {
-	return &LogController{service, userService, taskService}
+	return &LogController{service, taskService}
 }
 
 func (ctl *LogController) GetAllByTask(c *fiber.Ctx) error {
@@ -50,19 +48,14 @@ func (ctl *LogController) GetAllByTask(c *fiber.Ctx) error {
 }
 
 func (ctl *LogController) AddLog(c *fiber.Ctx) error {
-	userKey := c.Params("userKey")
 	taskKey := c.Params("taskKey")
+	taskSecret := c.Params("taskSecret")
 
-	if len(userKey) != 10 || len(taskKey) != 10 {
+	if len(taskSecret) != 10 || len(taskKey) != 10 {
 		return &util.BadRequestError{Message: "Invalid keys"}
 	}
 
-	user, err := ctl.userService.FindBySecretKey(userKey)
-	if err != nil {
-		return &util.BadRequestError{Message: "Invalid keys"}
-	}
-
-	task, taskErr := ctl.taskService.GetTaskBySecretKeyAndUserCheckAndExists(taskKey, user.ID)
+	task, taskErr := ctl.taskService.GetTaskByKeysCheckAndExists(taskKey, taskSecret)
 	if taskErr != nil {
 		return &util.BadRequestError{Message: "Invalid keys"}
 	}
