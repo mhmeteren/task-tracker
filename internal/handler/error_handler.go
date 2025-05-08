@@ -7,32 +7,44 @@ import (
 )
 
 func FiberErrorHandler(c *fiber.Ctx, err error) error {
+	statusCode := getStatusCode(err)
+	errorBody := getErrorBody(err)
+
+	return c.Status(statusCode).JSON(errorBody)
+}
+
+func getErrorBody(err error) *util.ErrorResponse[any] {
+	switch e := err.(type) {
+
+	case *util.ValidationError:
+		return &util.ErrorResponse[any]{Error: e.Errors}
+
+	case *util.NotFoundError, *util.ConflictError, *util.AuthError, *util.BadRequestError:
+		return &util.ErrorResponse[any]{Error: e.Error()}
+
+	case *fiber.Error:
+		return &util.ErrorResponse[any]{Error: e.Message}
+
+	default:
+		return &util.ErrorResponse[any]{Error: "Server error. message: " + e.Error()}
+	}
+}
+
+func getStatusCode(err error) int {
 	switch e := err.(type) {
 	case *util.ValidationError:
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"validation_errors": e.Errors,
-		})
+		return fiber.StatusUnprocessableEntity
 	case *util.NotFoundError:
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": e.Error(),
-		})
+		return fiber.StatusNotFound
 	case *util.ConflictError:
-		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"error": e.Error(),
-		})
+		return fiber.StatusConflict
 	case *util.AuthError:
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": e.Error(),
-		})
+		return fiber.StatusUnauthorized
 	case *util.BadRequestError:
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": e.Error(),
-		})
+		return fiber.StatusBadRequest
 	case *fiber.Error:
-		return c.Status(e.Code).JSON(fiber.Map{"error": e.Message})
+		return e.Code
 	default:
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Server error. message: " + e.Error(),
-		})
+		return fiber.StatusInternalServerError
 	}
 }

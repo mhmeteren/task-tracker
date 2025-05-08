@@ -15,14 +15,13 @@ func AutoMigrateAndSeed() {
 		&model.Log{},
 	)
 	if err != nil {
-		log.Panicf("[MIGRATION] Migration başarısız: %v", err)
+		log.Panicf("[MIGRATION] Migration failed: %v", err)
 	} else {
+		log.Println("[MIGRATION] Migration completed successfully.")
 
-		log.Println("[MIGRATION] Migration başarıyla tamamlandı.")
+		roleSeed()
+		userSeed()
 	}
-
-	roleSeed()
-	userSeed()
 }
 
 func roleSeed() {
@@ -35,10 +34,10 @@ func roleSeed() {
 			{ID: 2, Name: "user"},
 		}
 		if err := DB.Create(&roles).Error; err != nil {
-			log.Println("[SEED] Role seed sırasında hata:", err)
+			log.Println("[SEED] Error occurred during role seeding:", err)
+		} else {
+			log.Println("[SEED] Role seeding completed successfully")
 		}
-
-		log.Println("[SEED] Role seed işlemi tamamlandı")
 
 	}
 }
@@ -56,7 +55,7 @@ func userSeed() {
 
 		user := model.User{
 			Name:                  "Admin User",
-			Email:                 "admin@example.com",
+			Email:                 "admin@mail.com",
 			Password:              hashedPassword,
 			UserKey:               "",
 			RefreshToken:          nil,
@@ -65,9 +64,9 @@ func userSeed() {
 		}
 
 		if err := DB.Create(&user).Error; err != nil {
-			log.Println("[SEED] User seed sırasında hata:", err)
+			log.Println("[SEED] Error occurred during user seeding:", err)
 		} else {
-			log.Println("[SEED] Admin kullanıcı seed işlemi tamamlandı")
+			log.Println("[SEED] Admin user seeding completed successfully")
 		}
 	}
 }
