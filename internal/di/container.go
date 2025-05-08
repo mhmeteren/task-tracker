@@ -33,7 +33,7 @@ func InitContainer(db *gorm.DB) *Container {
 	//Log
 	logRepo := repository.NewLogRepository(db)
 	logService := service.NewLogService(logRepo)
-	logController := controller.NewLogController(logService, userService, taskService)
+	logController := controller.NewLogController(logService, taskService)
 
 	return &Container{
 		UserController: userController,
