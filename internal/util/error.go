@@ -1,5 +1,9 @@
 package util
 
+type ErrorResponse[T any] struct {
+	Error T `json:"error"`
+}
+
 type ValidationError struct {
 	Errors map[string]string
 }
