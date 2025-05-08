@@ -5,6 +5,7 @@ import (
 	"task-tracker/internal/context"
 	"task-tracker/internal/dto"
 	"task-tracker/internal/model"
+	"task-tracker/internal/parameter"
 	"task-tracker/internal/service"
 	"task-tracker/internal/util"
 	"time"
@@ -27,6 +28,12 @@ func NewLogController(
 
 func (ctl *LogController) GetAllByTask(c *fiber.Ctx) error {
 	taskID, _ := strconv.Atoi(c.Params("taskID"))
+
+	params, err := util.BindAndSetDefaultParameters[parameter.LogListParams](c)
+	if err != nil {
+		return err
+	}
+
 	userCtx := context.GetUserContext(c)
 
 	task, taskErr := ctl.taskService.GetTaskByIdAndUserCheckAndExists(uint(taskID), userCtx.UserID)
@@ -34,11 +41,12 @@ func (ctl *LogController) GetAllByTask(c *fiber.Ctx) error {
 		return &util.NotFoundError{Message: "Task not found"}
 	}
 
-	logs, err := ctl.service.GetAllByTask(task.ID)
+	logs, total, err := ctl.service.GetAllByTask(task.ID, params)
 	if err != nil {
 		return err
 	}
-	return c.JSON(dto.ToLogList(logs))
+
+	return c.JSON(dto.ToPaginatedList(dto.ToLogList(logs), params.Page, params.Limit, total))
 }
 
 func (ctl *LogController) AddLog(c *fiber.Ctx) error {
