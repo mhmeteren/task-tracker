@@ -26,7 +26,7 @@ func NewTaskRepository(db *gorm.DB) TaskRepository {
 
 func (r *taskRepository) GetAllByUser(userID uint) ([]model.Task, error) {
 	var tasks []model.Task
-	err := r.db.Where("user_id = ?", userID).Find(&tasks).Error
+	err := r.db.Where("user_id = ?", userID).Order("created_at DESC").Find(&tasks).Error
 
 	return tasks, err
 }

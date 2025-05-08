@@ -26,7 +26,7 @@ func (r *logRepository) Create(user *model.Log) error {
 
 func (r *logRepository) GetAllByTask(taskID uint) ([]model.Log, error) {
 	var logs []model.Log
-	err := r.db.Where("task_id = ?", taskID).Find(&logs).Error
+	err := r.db.Where("task_id = ?", taskID).Order("created_at DESC").Find(&logs).Error
 
 	return logs, err
 }
