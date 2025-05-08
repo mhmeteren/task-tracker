@@ -41,7 +41,6 @@ type UserDetail struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
-	UserKey   string `json:"user_key"`
 	CreatedAt string `json:"created_at"`
 }
 
@@ -50,7 +49,6 @@ func ToUserDetail(u model.User) UserDetail {
 		ID:        u.ID,
 		Name:      u.Name,
 		Email:     u.Email,
-		UserKey:   u.UserKey,
 		CreatedAt: u.CreatedAt.Format("2006-01-02 15:04:05"),
 	}
 }

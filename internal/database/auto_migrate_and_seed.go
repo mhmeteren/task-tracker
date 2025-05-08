@@ -57,7 +57,6 @@ func userSeed() {
 			Name:                  "Admin User",
 			Email:                 "admin@mail.com",
 			Password:              hashedPassword,
-			UserKey:               "",
 			RefreshToken:          nil,
 			RefreshTokenExpiresAt: time.Now().AddDate(-1, 0, 0),
 			RoleID:                1,

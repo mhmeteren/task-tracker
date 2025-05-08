@@ -27,6 +27,7 @@ func (r *UpdateTaskRequest) ApplyTo(user *model.Task) {
 type TaskListItem struct {
 	ID          uint   `json:"id"`
 	TaskKey     string `json:"task_key"`
+	TaskSecret  string `json:"task_secret"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	CreatedAt   string `json:"created_at"`
@@ -36,6 +37,7 @@ func ToTaskListItem(t model.Task) TaskListItem {
 	return TaskListItem{
 		ID:          t.ID,
 		TaskKey:     t.TaskKey,
+		TaskSecret:  t.TaskSecret,
 		Name:        t.Name,
 		Description: *t.Description,
 		CreatedAt:   t.CreatedAt.Format("2006-01-02 15:04:05"),
