@@ -9,7 +9,7 @@ import (
 type TaskRepository interface {
 	GetAllByUser(userID uint) ([]model.Task, error)
 	FindByID(id uint) (*model.Task, error)
-	FindBySecretKey(taskKey, taskSecret string) (*model.Task, error)
+	FindBySecretKeyWithNotificationInfo(taskKey, taskSecret string) (*model.Task, error)
 
 	Create(task *model.Task) error
 	Update(task *model.Task) error
@@ -26,7 +26,11 @@ func NewTaskRepository(db *gorm.DB) TaskRepository {
 
 func (r *taskRepository) GetAllByUser(userID uint) ([]model.Task, error) {
 	var tasks []model.Task
-	err := r.db.Where("user_id = ?", userID).Order("created_at DESC").Find(&tasks).Error
+	err := r.db.
+		Preload("Notification").
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Find(&tasks).Error
 
 	return tasks, err
 }
@@ -39,9 +43,10 @@ func (r *taskRepository) FindByID(id uint) (*model.Task, error) {
 	return &task, nil
 }
 
-func (r *taskRepository) FindBySecretKey(taskKey, taskSecret string) (*model.Task, error) {
+func (r *taskRepository) FindBySecretKeyWithNotificationInfo(taskKey, taskSecret string) (*model.Task, error) {
 	var task model.Task
 	err := r.db.
+		Preload("Notification").
 		Where("task_key = ? AND task_secret = ?", taskKey, taskSecret).
 		First(&task).Error
 	return &task, err

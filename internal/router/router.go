@@ -12,4 +12,5 @@ func AppRoute(app *fiber.App, container *di.Container) {
 	RegisterAuthRoutes(api, container.AuthController)
 	RegisterTaskRoutes(api, container.TaskController)
 	RegisterLogRoutes(api, container.LogController)
+	RegisterTaskNotificationRoutes(api, container.TaskNotificationController)
 }

@@ -5,6 +5,7 @@ import (
 	"task-tracker/internal/context"
 	"task-tracker/internal/dto"
 	"task-tracker/internal/model"
+	"task-tracker/internal/notifier"
 	"task-tracker/internal/parameter"
 	"task-tracker/internal/service"
 	"task-tracker/internal/util"
@@ -55,7 +56,7 @@ func (ctl *LogController) AddLog(c *fiber.Ctx) error {
 		return &util.BadRequestError{Message: "Invalid keys"}
 	}
 
-	task, taskErr := ctl.taskService.GetTaskByKeysCheckAndExists(taskKey, taskSecret)
+	task, taskErr := ctl.taskService.FindBySecretKeyWithNotificationInfo(taskKey, taskSecret)
 	if taskErr != nil {
 		return &util.BadRequestError{Message: "Invalid keys"}
 	}
@@ -67,5 +68,15 @@ func (ctl *LogController) AddLog(c *fiber.Ctx) error {
 	}
 
 	ctl.service.Create(&log)
+
+	if task.Notification != nil { // send notification
+		notifier.Enqueue(notifier.Notification{
+			Message: "Task: " + task.Name + "\nIP Address: " + log.IPAddress + "\nCreatedAt: " + log.CreatedAt.Format("2006-01-02 15:04:05.999"),
+			ChatID:  task.Notification.ChatID,
+			Token:   task.Notification.BotToken,
+			Service: task.Notification.Service,
+		})
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
