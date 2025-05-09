@@ -13,6 +13,7 @@ func AutoMigrateAndSeed() {
 		&model.User{},
 		&model.Task{},
 		&model.Log{},
+		&model.TaskNotification{},
 	)
 	if err != nil {
 		log.Panicf("[MIGRATION] Migration failed: %v", err)

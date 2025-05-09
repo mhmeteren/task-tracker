@@ -31,6 +31,8 @@ func getErrorMsg(fe validator.FieldError) string {
 		return fe.Field() + " must be less than or equal to " + fe.Param()
 	case "email":
 		return "Must be a valid email address"
+	case "oneof":
+		return fe.Field() + " must be one of the following: " + fe.Param()
 	}
-	return "Invalid value"
+	return fe.Field() + " is invalid"
 }
