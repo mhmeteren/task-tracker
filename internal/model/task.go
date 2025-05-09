@@ -10,4 +10,6 @@ type Task struct {
 	Name        string  `gorm:"not null;size:250"`
 	Description *string `gorm:"size:500"`
 	Logs        []Log   `gorm:"foreignKey:TaskID"`
+
+	Notification *TaskNotification `gorm:"foreignKey:TaskID;references:ID;constraint:OnDelete:CASCADE"`
 }

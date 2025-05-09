@@ -5,6 +5,7 @@ import (
 	"task-tracker/internal/database"
 	"task-tracker/internal/di"
 	"task-tracker/internal/handler"
+	"task-tracker/internal/notifier"
 	"task-tracker/internal/router"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	config.LoadConfig()
+	notifier.NotifyInit()
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: handler.FiberErrorHandler,

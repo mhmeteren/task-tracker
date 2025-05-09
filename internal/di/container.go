@@ -9,10 +9,11 @@ import (
 )
 
 type Container struct {
-	UserController *controller.UserController
-	AuthController *controller.AuthController
-	TaskController *controller.TaskController
-	LogController  *controller.LogController
+	UserController             *controller.UserController
+	AuthController             *controller.AuthController
+	TaskController             *controller.TaskController
+	TaskNotificationController *controller.TaskNotificationController
+	LogController              *controller.LogController
 }
 
 func InitContainer(db *gorm.DB) *Container {
@@ -30,15 +31,21 @@ func InitContainer(db *gorm.DB) *Container {
 	taskService := service.NewTaskService(taskRepo)
 	taskController := controller.NewTaskController(taskService)
 
+	//Task Notification
+	taskNotificationRepo := repository.NewTaskNotificationRepository(db)
+	taskNotificationService := service.NewTaskNotificationService(taskNotificationRepo)
+	taskNotificationController := controller.NewTaskNotificationController(taskNotificationService, taskService)
+
 	//Log
 	logRepo := repository.NewLogRepository(db)
 	logService := service.NewLogService(logRepo)
 	logController := controller.NewLogController(logService, taskService)
 
 	return &Container{
-		UserController: userController,
-		AuthController: authController,
-		TaskController: taskController,
-		LogController:  logController,
+		UserController:             userController,
+		AuthController:             authController,
+		TaskController:             taskController,
+		TaskNotificationController: taskNotificationController,
+		LogController:              logController,
 	}
 }

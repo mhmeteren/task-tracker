@@ -19,28 +19,30 @@ type UpdateTaskRequest struct {
 	Description string `json:"description" validate:"max=500"`
 }
 
-func (r *UpdateTaskRequest) ApplyTo(user *model.Task) {
-	user.Name = r.Name
-	user.Description = &r.Description
+func (r *UpdateTaskRequest) ApplyTo(task *model.Task) {
+	task.Name = r.Name
+	task.Description = &r.Description
 }
 
 type TaskListItem struct {
-	ID          uint   `json:"id"`
-	TaskKey     string `json:"task_key"`
-	TaskSecret  string `json:"task_secret"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   string `json:"created_at"`
+	ID               uint                      `json:"id"`
+	TaskKey          string                    `json:"task_key"`
+	TaskSecret       string                    `json:"task_secret"`
+	Name             string                    `json:"name"`
+	Description      string                    `json:"description"`
+	CreatedAt        string                    `json:"created_at"`
+	TaskNotification *TaskNotificationListItem `json:"integrated_service"`
 }
 
 func ToTaskListItem(t model.Task) TaskListItem {
 	return TaskListItem{
-		ID:          t.ID,
-		TaskKey:     t.TaskKey,
-		TaskSecret:  t.TaskSecret,
-		Name:        t.Name,
-		Description: *t.Description,
-		CreatedAt:   t.CreatedAt.Format("2006-01-02 15:04:05"),
+		ID:               t.ID,
+		TaskKey:          t.TaskKey,
+		TaskSecret:       t.TaskSecret,
+		Name:             t.Name,
+		Description:      *t.Description,
+		CreatedAt:        t.CreatedAt.Format("2006-01-02 15:04:05"),
+		TaskNotification: ToTaskNotificationListItem(t.Notification),
 	}
 }
 
