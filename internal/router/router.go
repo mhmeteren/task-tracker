@@ -8,6 +8,9 @@ import (
 )
 
 func AppRoute(app *fiber.App, container *di.Container) {
+	api_base := app.Group("/", middleware.RateLimitByIP())
+	RegisterHealthCheckRoutes(api_base, container.HealthCheckController)
+
 	api := app.Group("/api", middleware.RateLimitByIP())
 	RegisterUserRoutes(api, container.UserController)
 	RegisterAuthRoutes(api, container.AuthController)
