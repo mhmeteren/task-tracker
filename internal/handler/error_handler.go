@@ -19,7 +19,7 @@ func getErrorBody(err error) *util.ErrorResponse[any] {
 	case *util.ValidationError:
 		return &util.ErrorResponse[any]{Error: e.Errors}
 
-	case *util.NotFoundError, *util.ConflictError, *util.AuthError, *util.BadRequestError:
+	case *util.NotFoundError, *util.ConflictError, *util.AuthError, *util.BadRequestError, *util.RateLimitError:
 		return &util.ErrorResponse[any]{Error: e.Error()}
 
 	case *fiber.Error:
@@ -42,6 +42,8 @@ func getStatusCode(err error) int {
 		return fiber.StatusUnauthorized
 	case *util.BadRequestError:
 		return fiber.StatusBadRequest
+	case *util.RateLimitError:
+		return fiber.StatusTooManyRequests
 	case *fiber.Error:
 		return e.Code
 	default:

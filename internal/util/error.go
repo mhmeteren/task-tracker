@@ -43,3 +43,11 @@ type BadRequestError struct {
 func (e *BadRequestError) Error() string {
 	return e.Message
 }
+
+type RateLimitError struct {
+	Message string
+}
+
+func (e *RateLimitError) Error() string {
+	return e.Message
+}
