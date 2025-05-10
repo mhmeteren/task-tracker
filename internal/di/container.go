@@ -14,6 +14,7 @@ type Container struct {
 	TaskController             *controller.TaskController
 	TaskNotificationController *controller.TaskNotificationController
 	LogController              *controller.LogController
+	HealthCheckController      *controller.HealthCheckController
 }
 
 func InitContainer(db *gorm.DB) *Container {
@@ -41,11 +42,15 @@ func InitContainer(db *gorm.DB) *Container {
 	logService := service.NewLogService(logRepo)
 	logController := controller.NewLogController(logService, taskService)
 
+	//Health Check
+	healthCheckController := controller.NewHealthCheckController()
+
 	return &Container{
 		UserController:             userController,
 		AuthController:             authController,
 		TaskController:             taskController,
 		TaskNotificationController: taskNotificationController,
 		LogController:              logController,
+		HealthCheckController:      healthCheckController,
 	}
 }
