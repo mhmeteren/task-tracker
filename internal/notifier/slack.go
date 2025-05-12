@@ -3,8 +3,8 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"task-tracker/internal/logger"
 )
 
 type SlackNotifier struct{}
@@ -25,7 +25,7 @@ func (s SlackNotifier) Send(n Notification) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("slack error: %s", resp.Status)
+		logger.GlobalLogger.Error("Slack notifier erorr", &logger.LogFields{"tags": []string{"notification", "slack"}, "status": resp.Status})
 	}
 
 	return nil

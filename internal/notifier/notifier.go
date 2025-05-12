@@ -1,6 +1,8 @@
 package notifier
 
-import "log"
+import (
+	"task-tracker/internal/logger"
+)
 
 type Notification struct {
 	Message   string
@@ -42,7 +44,7 @@ func StartWorker() {
 			}
 			err := service.Send(msg)
 			if err != nil {
-				log.Printf("[NOTIFICATION] message: %v", err.Error())
+				logger.GlobalLogger.Error("Notifier erorr", &logger.LogFields{"tags": []string{"notification"}, "error": err.Error()})
 			}
 		}
 	}()
