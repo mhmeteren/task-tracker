@@ -1,8 +1,8 @@
 package database
 
 import (
-	"log"
 	"task-tracker/config"
+	"task-tracker/internal/logger"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -15,6 +15,8 @@ func InitDB() {
 	var db *gorm.DB
 	var err error
 
+	tags := []string{"db", "sql", "pgsql"}
+
 	maxAttempts := 10
 	for attempts := 1; attempts <= maxAttempts; attempts++ {
 		db, err = gorm.Open(postgres.Open(config.Cfg.Database.SQLDBUrl), &gorm.Config{})
@@ -22,7 +24,7 @@ func InitDB() {
 			sqlDB, sqlErr := db.DB()
 			if sqlErr == nil {
 				if pingErr := sqlDB.Ping(); pingErr == nil {
-					log.Printf("[DB] Connection successful (attempt %d).", attempts)
+					logger.GlobalLogger.Info("Connection successful", &logger.LogFields{"tags": tags, "attempts": attempts})
 					break
 				} else {
 					err = pingErr
@@ -31,15 +33,14 @@ func InitDB() {
 				err = sqlErr
 			}
 		}
-
-		log.Printf("[DB] Connection attempt %d failed: %v", attempts, err)
+		logger.GlobalLogger.Error("Connection failed", &logger.LogFields{"tags": tags, "attempts": attempts, "error": err})
 		time.Sleep(2 * time.Second)
 	}
 
 	if err != nil {
-		log.Panicf("[DB] PostgreSQL connection failed: %v", err)
+		logger.GlobalLogger.Panic("PostgreSQL connection failed", &logger.LogFields{"tags": tags, "error": err})
 	}
 
 	DB = db
-	log.Println("[DB] PostgreSQL connection established successfully.")
+	logger.GlobalLogger.Info("PostgreSQL connection established successfully.", &logger.LogFields{"tags": tags})
 }

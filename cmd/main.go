@@ -5,6 +5,7 @@ import (
 	"task-tracker/internal/database"
 	"task-tracker/internal/di"
 	"task-tracker/internal/handler"
+	"task-tracker/internal/logger"
 	"task-tracker/internal/notifier"
 	"task-tracker/internal/router"
 
@@ -12,7 +13,11 @@ import (
 )
 
 func main() {
+	logger.Init()
 	config.LoadConfig()
+
+	logger.GlobalLogger.Info("Application starting...", &logger.LogFields{"tags": []string{"app", "start"}, "environment": config.Cfg.AppEnv, "port": config.Cfg.ServerPort})
+
 	notifier.NotifyInit()
 
 	app := fiber.New(fiber.Config{

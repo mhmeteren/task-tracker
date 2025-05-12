@@ -1,7 +1,7 @@
 package database
 
 import (
-	"log"
+	"task-tracker/internal/logger"
 	"task-tracker/internal/model"
 	"task-tracker/internal/util"
 	"time"
@@ -16,9 +16,9 @@ func AutoMigrateAndSeed() {
 		&model.TaskNotification{},
 	)
 	if err != nil {
-		log.Panicf("[MIGRATION] Migration failed: %v", err)
+		logger.GlobalLogger.Panic("Migration failed", &logger.LogFields{"tags": []string{"migration", "sql", "pgsql"}, "error": err})
 	} else {
-		log.Println("[MIGRATION] Migration completed successfully.")
+		logger.GlobalLogger.Info("Migration completed successfully.", &logger.LogFields{"tags": []string{"migration", "sql", "pgsql"}})
 
 		roleSeed()
 		userSeed()
@@ -35,9 +35,9 @@ func roleSeed() {
 			{ID: 2, Name: "user"},
 		}
 		if err := DB.Create(&roles).Error; err != nil {
-			log.Println("[SEED] Error occurred during role seeding:", err)
+			logger.GlobalLogger.Error("Error occurred during role seeding", &logger.LogFields{"tags": []string{"seed", "sql", "pgsql"}, "error": err})
 		} else {
-			log.Println("[SEED] Role seeding completed successfully")
+			logger.GlobalLogger.Info("Role seeding completed successfully.", &logger.LogFields{"tags": []string{"seed", "sql", "pgsql"}})
 		}
 
 	}
@@ -51,7 +51,7 @@ func userSeed() {
 
 		hashedPassword, err := util.HashPassword("tasktracker")
 		if err != nil {
-			log.Println("[SEED] User seed sırasında hata:", err)
+			logger.GlobalLogger.Error("Error occurred during user seeding", &logger.LogFields{"tags": []string{"seed", "sql", "pgsql"}, "error": err})
 		}
 
 		user := model.User{
@@ -64,9 +64,9 @@ func userSeed() {
 		}
 
 		if err := DB.Create(&user).Error; err != nil {
-			log.Println("[SEED] Error occurred during user seeding:", err)
+			logger.GlobalLogger.Error("Error occurred during user seeding", &logger.LogFields{"tags": []string{"seed", "sql", "pgsql"}, "error": err})
 		} else {
-			log.Println("[SEED] Admin user seeding completed successfully")
+			logger.GlobalLogger.Info("Admin user seeding completed successfully", &logger.LogFields{"tags": []string{"seed", "sql", "pgsql"}})
 		}
 	}
 }

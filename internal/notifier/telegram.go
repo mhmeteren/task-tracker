@@ -1,9 +1,9 @@
 package notifier
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
+	"task-tracker/internal/logger"
 )
 
 type TelegramNotifier struct{}
@@ -22,7 +22,7 @@ func (t TelegramNotifier) Send(n Notification) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("telegram error: %s", resp.Status)
+		logger.GlobalLogger.Error("Telegram notifier erorr", &logger.LogFields{"tags": []string{"notification", "telegram"}, "status": resp.Status})
 	}
 
 	return nil

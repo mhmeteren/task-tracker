@@ -1,9 +1,9 @@
 package config
 
 import (
-	"log"
 	"os"
 	"strconv"
+	"task-tracker/internal/logger"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -21,7 +21,7 @@ func LoadConfig() {
 	_ = godotenv.Load(".env")         // load common first
 	err := godotenv.Overload(envFile) // override with environment-specific
 	if err != nil {
-		log.Fatalf("Error loading %s file: %v", envFile, err)
+		logger.GlobalLogger.Fatal("Error loading environment", &logger.LogFields{"file": envFile, "error": err})
 	}
 
 	Cfg = Config{
@@ -39,7 +39,7 @@ func LoadConfig() {
 func loadJWTConfig() JWTConfig {
 	ExpiryMinute, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_MINUTE"))
 	if err != nil {
-		log.Fatalf("Error Expiry Minute %s", err)
+		logger.GlobalLogger.Fatal("Error Expiry Minute", &logger.LogFields{"error": err})
 	}
 
 	return JWTConfig{
