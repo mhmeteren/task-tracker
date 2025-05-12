@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"task-tracker/internal/context"
+	"task-tracker/internal/logger"
 	"task-tracker/internal/util"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,6 +11,8 @@ import (
 func FiberErrorHandler(c *fiber.Ctx, err error) error {
 	statusCode := getStatusCode(err)
 	errorBody := getErrorBody(err)
+
+	addLog(c, err, statusCode)
 
 	return c.Status(statusCode).JSON(errorBody)
 }
@@ -49,4 +53,23 @@ func getStatusCode(err error) int {
 	default:
 		return fiber.StatusInternalServerError
 	}
+}
+
+func addLog(c *fiber.Ctx, err error, statusCode int) {
+	var user_id *uint
+	userCtx := context.GetUserContext(c)
+	if userCtx != nil {
+		user_id = &userCtx.UserID
+	}
+
+	logger.GlobalLogger.Error("Request failed", &logger.LogFields{
+		"path":       c.Path(),
+		"method":     c.Method(),
+		"status":     statusCode,
+		"error":      err.Error(),
+		"client_ip":  c.IP(),
+		"user_id":    user_id,
+		"user_agent": c.Get("User-Agent"),
+		"tags":       []string{"request", "handler"},
+	})
 }
