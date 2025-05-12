@@ -31,4 +31,4 @@ go.work
 
 docs/*
 
-*.log
+logs/
