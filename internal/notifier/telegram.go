@@ -12,7 +12,7 @@ func (t TelegramNotifier) Send(n Notification) error {
 	apiURL := "https://api.telegram.org/bot" + n.Token + "/sendMessage"
 
 	data := url.Values{}
-	data.Set("chat_id", n.ChatID)
+	data.Set("chat_id", n.Recipient)
 	data.Set("text", n.Message)
 
 	resp, err := http.PostForm(apiURL, data)

@@ -3,10 +3,10 @@ package notifier
 import "log"
 
 type Notification struct {
-	Message string
-	ChatID  string
-	Token   string
-	Service string
+	Message   string
+	Recipient string
+	Token     string
+	Service   string
 }
 
 type Notifier interface {
@@ -19,6 +19,7 @@ var services = map[string]Notifier{}
 
 func NotifyInit() {
 	Register("telegram", TelegramNotifier{})
+	Register("slack", SlackNotifier{})
 
 	StartWorker()
 }

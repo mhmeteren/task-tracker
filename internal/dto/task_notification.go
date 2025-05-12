@@ -3,17 +3,17 @@ package dto
 import "task-tracker/internal/model"
 
 type CreateTaskNotificationRequest struct {
-	TaskID   uint   `json:"task_id" validate:"required"`
-	Service  string `json:"service" validate:"required,oneof=telegram slack"`
-	BotToken string `json:"bot_token" validate:"required"`
-	ChatID   string `json:"chat_id" validate:"required"`
+	TaskID    uint   `json:"task_id" validate:"required"`
+	Service   string `json:"service" validate:"required,oneof=telegram slack"`
+	BotToken  string `json:"bot_token" validate:"required"`
+	Recipient string `json:"recipient" validate:"required"`
 }
 
 func (r *CreateTaskNotificationRequest) ToModel() model.TaskNotification {
 	return model.TaskNotification{
-		Service:  r.Service,
-		BotToken: r.BotToken,
-		ChatID:   r.ChatID,
+		Service:   r.Service,
+		BotToken:  r.BotToken,
+		Recipient: r.Recipient,
 	}
 }
 

@@ -47,10 +47,10 @@ func (ctl *TaskNotificationController) NotificationServiceIntegration(c *fiber.C
 
 	//Send Test Notification
 	notifier.Enqueue(notifier.Notification{
-		Message: "Test message: your configuration is valid.",
-		ChatID:  taskNoti.ChatID,
-		Token:   taskNoti.BotToken,
-		Service: taskNoti.Service,
+		Message:   "Test message: your configuration is valid.",
+		Recipient: taskNoti.Recipient,
+		Token:     taskNoti.BotToken,
+		Service:   taskNoti.Service,
 	})
 
 	return c.Status(fiber.StatusCreated).JSON(dto.ResultResponse{Message: req.Service + " integration is successfully. Check your log chat"})
