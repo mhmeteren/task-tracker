@@ -71,10 +71,10 @@ func (ctl *LogController) AddLog(c *fiber.Ctx) error {
 
 	if task.Notification != nil { // send notification
 		notifier.Enqueue(notifier.Notification{
-			Message: "Task: " + task.Name + "\nIP Address: " + log.IPAddress + "\nCreatedAt: " + log.CreatedAt.Format("2006-01-02 15:04:05.999"),
-			ChatID:  task.Notification.ChatID,
-			Token:   task.Notification.BotToken,
-			Service: task.Notification.Service,
+			Message:   "Task: " + task.Name + "\nIP Address: " + log.IPAddress + "\nCreatedAt: " + log.CreatedAt.Format("2006-01-02 15:04:05.999"),
+			Recipient: task.Notification.Recipient,
+			Token:     task.Notification.BotToken,
+			Service:   task.Notification.Service,
 		})
 	}
 
