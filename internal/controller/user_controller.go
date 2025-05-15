@@ -26,7 +26,7 @@ func (ctl *UserController) CreateUser(c *fiber.Ctx) error {
 
 	checked_user, _ := ctl.service.GetByEmail(req.Email)
 	if checked_user != nil {
-		return fiber.NewError(fiber.StatusNotFound, "Email must be unique")
+		return fiber.NewError(fiber.StatusBadRequest, "Email must be unique")
 	}
 
 	user := req.ToModel()
