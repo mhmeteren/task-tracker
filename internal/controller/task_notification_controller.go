@@ -22,6 +22,20 @@ func NewTaskNotificationController(
 	return &TaskNotificationController{service, taskService}
 }
 
+// NotificationServiceIntegration godoc
+// @Summary Integrate a notification service to a task
+// @Description Adds a notification integration (Telegram, Slack, Discord, etc.) to a user's task and sends a test notification
+// @Tags Task Notifications
+// @Accept json
+// @Produce json
+// @Param request body dto.CreateTaskNotificationRequest true "Notification integration details"
+// @Success 201 {object} dto.ResultResponse "Integration created successfully and test notification sent"
+// @Failure 400 {object} util.BadRequestError "Invalid request"
+// @Failure 401 {object} util.AuthError "Unauthorized, invalid or missing token"
+// @Failure 404 {object} util.NotFoundError "Task not found or integration already exists"
+// @Failure 422 {object} util.ValidationError
+// @Security BearerAuth
+// @Router /api/task-notifications [post]
 func (ctl *TaskNotificationController) NotificationServiceIntegration(c *fiber.Ctx) error {
 	req, err := util.BindAndValidate[dto.CreateTaskNotificationRequest](c)
 	if err != nil {
@@ -56,6 +70,17 @@ func (ctl *TaskNotificationController) NotificationServiceIntegration(c *fiber.C
 	return c.Status(fiber.StatusCreated).JSON(dto.ResultResponse{Message: req.Service + " integration is successfully. Check your log chat"})
 }
 
+// DeleteNotificationServiceInformation godoc
+// @Summary Delete notification integration for a task
+// @Description Deletes the notification service integration information for the specified task of the authenticated user
+// @Tags Task Notifications
+// @Produce json
+// @Param taskID path int true "Task ID"
+// @Success 204 "Notification integration successfully deleted"
+// @Failure 401 {object} util.AuthError "Unauthorized, invalid or missing token"
+// @Failure 404 {object} util.NotFoundError "Integration information not found"
+// @Security BearerAuth
+// @Router /api/task-notifications/{taskID} [delete]
 func (ctl *TaskNotificationController) DeleteNotificationServiceInformation(c *fiber.Ctx) error {
 	task_id, _ := strconv.Atoi(c.Params("taskID"))
 

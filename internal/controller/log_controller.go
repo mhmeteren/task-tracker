@@ -25,6 +25,19 @@ func NewLogController(
 	return &LogController{service, taskService}
 }
 
+// GetAllByTask godoc
+// @Summary List logs by task (paginated)
+// @Description Lists paginated logs for a task owned by the authenticated user
+// @Tags Logs
+// @Produce json
+// @Param taskID path int true "Task ID"
+// @Param filter query parameter.LogListParams false "Query params for pagination, sorting etc."
+// @Success 200 {object} dto.PaginatedResponse[LogListItem]
+// @Failure 400 {object} util.NotFoundError
+// @Failure 404 {object} util.BadRequestError
+// @Failure 401 {object} util.AuthError "Unauthorized, invalid or missing token"
+// @Security BearerAuth
+// @Router /api/logs/{taskID} [get]
 func (ctl *LogController) GetAllByTask(c *fiber.Ctx) error {
 	taskID, _ := strconv.Atoi(c.Params("taskID"))
 
@@ -48,6 +61,17 @@ func (ctl *LogController) GetAllByTask(c *fiber.Ctx) error {
 	return c.JSON(dto.ToPaginatedList(dto.ToLogList(logs), params.Page, params.Limit, total))
 }
 
+// AddLog godoc
+// @Summary Add a log entry for a task
+// @Description Adds a log entry if taskKey and taskSecret are valid, and triggers notification if configured
+// @Tags Logs
+// @Accept json
+// @Produce json
+// @Param taskKey path string true "Task Key (10 characters)"
+// @Param taskSecret path string true "Task Secret (10 characters)"
+// @Success 200 "Log added successfully"
+// @Failure 400 {object} util.BadRequestError "Invalid keys or bad request"
+// @Router /api/logs/{taskKey}/{taskSecret} [get]
 func (ctl *LogController) AddLog(c *fiber.Ctx) error {
 	taskKey := c.Params("taskKey")
 	taskSecret := c.Params("taskSecret")
