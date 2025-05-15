@@ -14,6 +14,14 @@ func NewHealthCheckController() *HealthCheckController {
 	return &HealthCheckController{}
 }
 
+// HealthCheck godoc
+// @Summary Check system health
+// @Description Returns application health status and database connectivity check
+// @Tags System
+// @Produce json
+// @Success 200 {object} dto.HealthCheckResponse
+// @Failure 503 {object} dto.HealthCheckResponse
+// @Router /health [get]
 func (h *HealthCheckController) Health(c *fiber.Ctx) error {
 
 	response := dto.HealthCheckResponse{
