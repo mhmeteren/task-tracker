@@ -1,0 +1,665 @@
+definitions:
+  fiber.Error:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  task-tracker_internal_dto.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  task-tracker_internal_dto.CreateTaskNotificationRequest:
+    properties:
+      bot_token:
+        type: string
+      recipient:
+        type: string
+      service:
+        enum:
+        - telegram
+        - slack
+        type: string
+      task_id:
+        type: integer
+    required:
+    - bot_token
+    - recipient
+    - service
+    - task_id
+    type: object
+  task-tracker_internal_dto.CreateTaskRequest:
+    properties:
+      description:
+        maxLength: 500
+        type: string
+      name:
+        maxLength: 250
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  task-tracker_internal_dto.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  task-tracker_internal_dto.HealthCheckResponse:
+    properties:
+      entries:
+        additionalProperties:
+          $ref: '#/definitions/task-tracker_internal_dto.HealthEntry'
+        type: object
+      status:
+        type: string
+    type: object
+  task-tracker_internal_dto.HealthEntry:
+    properties:
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  task-tracker_internal_dto.LogListItem:
+    properties:
+      created_at:
+        type: string
+      ip_address:
+        type: string
+    type: object
+  task-tracker_internal_dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  task-tracker_internal_dto.PaginatedResponse-LogListItem:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/task-tracker_internal_dto.LogListItem'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  task-tracker_internal_dto.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  task-tracker_internal_dto.ResultResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  task-tracker_internal_dto.TaskListItem:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      integrated_service:
+        $ref: '#/definitions/task-tracker_internal_dto.TaskNotificationListItem'
+      name:
+        type: string
+      task_key:
+        type: string
+      task_secret:
+        type: string
+    type: object
+  task-tracker_internal_dto.TaskNotificationListItem:
+    properties:
+      created_at:
+        type: string
+      service:
+        type: string
+    type: object
+  task-tracker_internal_dto.UpdateTaskRequest:
+    properties:
+      description:
+        maxLength: 500
+        type: string
+      name:
+        maxLength: 250
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  task-tracker_internal_dto.UserDetail:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  task-tracker_internal_dto.UserListItem:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  task-tracker_internal_util.AuthError:
+    properties:
+      message:
+        type: string
+    type: object
+  task-tracker_internal_util.BadRequestError:
+    properties:
+      message:
+        type: string
+    type: object
+  task-tracker_internal_util.NotFoundError:
+    properties:
+      message:
+        type: string
+    type: object
+  task-tracker_internal_util.ValidationError:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+info:
+  contact: {}
+  description: This is a sample task logger API
+  title: Task Tracker API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns access & refresh tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task-tracker_internal_dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.ValidationError'
+      summary: User login
+      tags:
+      - Auth
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh token, returns access & refresh tokens
+      parameters:
+      - description: Refresh credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task-tracker_internal_dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.ValidationError'
+      summary: Refresh Token
+      tags:
+      - Auth
+  /api/logs/{taskID}:
+    get:
+      description: Lists paginated logs for a task owned by the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskID
+        required: true
+        type: integer
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.PaginatedResponse-LogListItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.NotFoundError'
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+      security:
+      - BearerAuth: []
+      summary: List logs by task (paginated)
+      tags:
+      - Logs
+  /api/logs/{taskKey}/{taskSecret}:
+    get:
+      consumes:
+      - application/json
+      description: Adds a log entry if taskKey and taskSecret are valid, and triggers
+        notification if configured
+      parameters:
+      - description: Task Key (10 characters)
+        in: path
+        name: taskKey
+        required: true
+        type: string
+      - description: Task Secret (10 characters)
+        in: path
+        name: taskSecret
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Log added successfully
+        "400":
+          description: Invalid keys or bad request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+      summary: Add a log entry for a task
+      tags:
+      - Logs
+  /api/task-notifications:
+    post:
+      consumes:
+      - application/json
+      description: Adds a notification integration (Telegram, Slack, Discord, etc.)
+        to a user's task and sends a test notification
+      parameters:
+      - description: Notification integration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task-tracker_internal_dto.CreateTaskNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Integration created successfully and test notification sent
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.ResultResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: Task not found or integration already exists
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.NotFoundError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.ValidationError'
+      security:
+      - BearerAuth: []
+      summary: Integrate a notification service to a task
+      tags:
+      - Task Notifications
+  /api/task-notifications/{taskID}:
+    delete:
+      description: Deletes the notification service integration information for the
+        specified task of the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Notification integration successfully deleted
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: Integration information not found
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.NotFoundError'
+      security:
+      - BearerAuth: []
+      summary: Delete notification integration for a task
+      tags:
+      - Task Notifications
+  /api/tasks:
+    get:
+      description: Returns a list of tasks belonging to the logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/task-tracker_internal_dto.TaskListItem'
+            type: array
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+      security:
+      - BearerAuth: []
+      summary: Get all tasks for the authenticated user
+      tags:
+      - Tasks
+    post:
+      consumes:
+      - application/json
+      description: Creates a new task for the authenticated user
+      parameters:
+      - description: Task creation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task-tracker_internal_dto.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Task successfully created
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.ResultResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.ValidationError'
+      security:
+      - BearerAuth: []
+      summary: Create a new task
+      tags:
+      - Tasks
+  /api/tasks/{id}:
+    delete:
+      description: Deletes a task by ID for the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Task successfully deleted
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.NotFoundError'
+      security:
+      - BearerAuth: []
+      summary: Delete a task
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      description: Updates a task by ID for the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task-tracker_internal_dto.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Task successfully updated
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.ResultResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.NotFoundError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.ValidationError'
+      security:
+      - BearerAuth: []
+      summary: Update an existing task
+      tags:
+      - Tasks
+  /api/users:
+    get:
+      description: Retrieves a list of all users. Requires admin role and authentication
+        token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            items:
+              $ref: '#/definitions/task-tracker_internal_dto.UserListItem'
+            type: array
+        "401":
+          description: Unauthorized, invalid or missing token or permission denied
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account. No authentication required.
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task-tracker_internal_dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User successfully created
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.ResultResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.ValidationError'
+      summary: Register a new user
+      tags:
+      - Users
+  /api/users/{id}:
+    delete:
+      description: Deletes a user by ID. Only users with admin role can perform this
+        action. Admins cannot delete their own account.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User successfully deleted
+        "400":
+          description: Attempt to delete own admin account
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.BadRequestError'
+        "401":
+          description: Unauthorized, invalid or missing token or permission denied
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.NotFoundError'
+      security:
+      - BearerAuth: []
+      summary: Delete a user by ID
+      tags:
+      - Users
+  /api/users/profile:
+    get:
+      description: Retrieves the profile information of the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile details
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.UserDetail'
+        "401":
+          description: Unauthorized, invalid or missing token
+          schema:
+            $ref: '#/definitions/task-tracker_internal_util.AuthError'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/fiber.Error'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - Users
+  /health:
+    get:
+      description: Returns application health status and database connectivity check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.HealthCheckResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/task-tracker_internal_dto.HealthCheckResponse'
+      summary: Check system health
+      tags:
+      - System
+securityDefinitions:
+  BearerAuth:
+    description: Enter token with **Bearer** prefix, e.g. "Bearer eyJhbGciOiJIUzI1..."
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

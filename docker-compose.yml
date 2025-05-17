@@ -1,0 +1,36 @@
+services:
+  pgdb:
+    image: postgres:latest
+    container_name: pgdb
+    restart: always
+    environment:
+      POSTGRES_DB: tasktrackerapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - task-tracker-pgdata:/var/lib/postgresql/data
+    networks:
+      - task-tracker-appnet
+
+  app:
+    image: task-tracker:latest
+    container_name: app
+    depends_on:
+      - pgdb
+    env_file:
+      - .env
+      - .env.production
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_ENV=production
+    networks:
+      - task-tracker-appnet
+
+volumes:
+  task-tracker-pgdata:
+
+networks:
+  task-tracker-appnet:

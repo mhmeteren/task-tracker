@@ -18,8 +18,12 @@ func LoadConfig() {
 	}
 
 	envFile := ".env." + env
-	_ = godotenv.Load(".env")         // load common first
-	err := godotenv.Overload(envFile) // override with environment-specific
+	err := godotenv.Load(".env") // load common first
+	if err != nil {
+		logger.GlobalLogger.Fatal("Error loading environment", &logger.LogFields{"file": ".env", "error": err})
+	}
+
+	err = godotenv.Load(envFile) // override with environment-specific
 	if err != nil {
 		logger.GlobalLogger.Fatal("Error loading environment", &logger.LogFields{"file": envFile, "error": err})
 	}
