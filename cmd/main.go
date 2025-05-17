@@ -37,7 +37,8 @@ func main() {
 	})
 
 	database.InitDB()
-	if config.Cfg.AppEnv == "development" {
+
+	if config.Cfg.AppEnv == "development" || config.Cfg.AppEnv == "production" {
 		database.AutoMigrateAndSeed()
 
 		app.Get("/swagger/*", fiberSwagger.WrapHandler)
