@@ -18,6 +18,15 @@
 go.work
 
 
+
+
+# Other files...
+# docs/*
+
+logs/
+
+
+
 # But not these files...
 !/.gitignore
 
@@ -27,8 +36,3 @@ go.work
 
 !README.md
 !LICENSE
-
-
-docs/*
-
-logs/

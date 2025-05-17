@@ -1,0 +1,1022 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample task logger API",
+        "title": "Task Tracker API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "description": "Authenticates a user and returns access \u0026 refresh tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.ValidationError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh": {
+            "post": {
+                "description": "Refresh token, returns access \u0026 refresh tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh Token",
+                "parameters": [
+                    {
+                        "description": "Refresh credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.ValidationError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logs/{taskID}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Lists paginated logs for a task owned by the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Logs"
+                ],
+                "summary": "List logs by task (paginated)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "taskID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.PaginatedResponse-LogListItem"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.NotFoundError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logs/{taskKey}/{taskSecret}": {
+            "get": {
+                "description": "Adds a log entry if taskKey and taskSecret are valid, and triggers notification if configured",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Logs"
+                ],
+                "summary": "Add a log entry for a task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task Key (10 characters)",
+                        "name": "taskKey",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Task Secret (10 characters)",
+                        "name": "taskSecret",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log added successfully"
+                    },
+                    "400": {
+                        "description": "Invalid keys or bad request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/task-notifications": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adds a notification integration (Telegram, Slack, Discord, etc.) to a user's task and sends a test notification",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Task Notifications"
+                ],
+                "summary": "Integrate a notification service to a task",
+                "parameters": [
+                    {
+                        "description": "Notification integration details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.CreateTaskNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Integration created successfully and test notification sent",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.ResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found or integration already exists",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.NotFoundError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.ValidationError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/task-notifications/{taskID}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes the notification service integration information for the specified task of the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Task Notifications"
+                ],
+                "summary": "Delete notification integration for a task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "taskID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Notification integration successfully deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "Integration information not found",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.NotFoundError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a list of tasks belonging to the logged-in user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Get all tasks for the authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/task-tracker_internal_dto.TaskListItem"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new task for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Create a new task",
+                "parameters": [
+                    {
+                        "description": "Task creation payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.CreateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Task successfully created",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.ResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.ValidationError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates a task by ID for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Update an existing task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Task update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.UpdateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Task successfully updated",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.ResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.NotFoundError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.ValidationError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a task by ID for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Delete a task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Task successfully deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.NotFoundError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of all users. Requires admin role and authentication token.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "List of users",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/task-tracker_internal_dto.UserListItem"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token or permission denied",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new user account. No authentication required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User registration data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User successfully created",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.ResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.ValidationError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the profile information of the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get current user profile",
+                "responses": {
+                    "200": {
+                        "description": "User profile details",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.UserDetail"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a user by ID. Only users with admin role can perform this action. Admins cannot delete their own account.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete a user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User successfully deleted"
+                    },
+                    "400": {
+                        "description": "Attempt to delete own admin account",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.BadRequestError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, invalid or missing token or permission denied",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.AuthError"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_util.NotFoundError"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns application health status and database connectivity check",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Check system health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.HealthCheckResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/task-tracker_internal_dto.HealthCheckResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "fiber.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.CreateTaskNotificationRequest": {
+            "type": "object",
+            "required": [
+                "bot_token",
+                "recipient",
+                "service",
+                "task_id"
+            ],
+            "properties": {
+                "bot_token": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "service": {
+                    "type": "string",
+                    "enum": [
+                        "telegram",
+                        "slack"
+                    ]
+                },
+                "task_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "task-tracker_internal_dto.CreateTaskRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2
+                }
+            }
+        },
+        "task-tracker_internal_dto.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "task-tracker_internal_dto.HealthCheckResponse": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/task-tracker_internal_dto.HealthEntry"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.HealthEntry": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "task-tracker_internal_dto.LogListItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "ip_address": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.PaginatedResponse-LogListItem": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task-tracker_internal_dto.LogListItem"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "task-tracker_internal_dto.RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.ResultResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.TaskListItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "integrated_service": {
+                    "$ref": "#/definitions/task-tracker_internal_dto.TaskNotificationListItem"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "task_key": {
+                    "type": "string"
+                },
+                "task_secret": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.TaskNotificationListItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "service": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.UpdateTaskRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2
+                }
+            }
+        },
+        "task-tracker_internal_dto.UserDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_dto.UserListItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_util.AuthError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_util.BadRequestError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_util.NotFoundError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-tracker_internal_util.ValidationError": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter token with **Bearer** prefix, e.g. \"Bearer eyJhbGciOiJIUzI1...\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

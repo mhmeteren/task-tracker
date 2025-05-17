@@ -1,0 +1,8 @@
+.git
+.gitignore
+.env.development
+*.md
+logs/
+*.DS_Store
+Makefile
+docker-compose.yml
