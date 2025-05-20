@@ -15,7 +15,7 @@ services:
       - task-tracker-appnet
 
   app:
-    build: .
+    image: task-tracker:latest
     container_name: app
     depends_on:
       - pgdb
@@ -23,9 +23,12 @@ services:
       - "3000:3000"
     networks:
       - task-tracker-appnet
+    volumes:
+      - ../logs:/logs
 
 volumes:
   task-tracker-pgdata:
 
 networks:
   task-tracker-appnet:
+    name: task-tracker-appnet

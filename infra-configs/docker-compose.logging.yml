@@ -1,0 +1,56 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.17
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - task-tracker-appnet
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.17
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - task-tracker-appnet
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.17
+    container_name: filebeat
+    user: root
+    depends_on:
+      - elasticsearch
+      - app
+    networks:
+      - task-tracker-appnet
+    command: >
+      sh -c "cp /config/filebeat.yml /usr/share/filebeat/filebeat.yml &&
+             chmod go-w /usr/share/filebeat/filebeat.yml &&
+             filebeat -e"
+    volumes:
+      - ./filebeat.yml:/config/filebeat.yml:ro       
+      - ../logs:/app/logs:ro                         
+
+
+volumes:
+  esdata:
+
+
+# networks:
+#   task-tracker-appnet:
+#     external: true
