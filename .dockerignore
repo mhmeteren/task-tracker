@@ -6,3 +6,4 @@ logs/
 *.DS_Store
 Makefile
 docker-compose.yml
+infra-configs/
