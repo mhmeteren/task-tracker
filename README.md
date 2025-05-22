@@ -29,7 +29,7 @@ It is designed for easy integration with cron jobs, scripts, and other automated
 2. **The user triggers a GET request** after the desired action is completed.  
    Example format:
 
-   ```http
+   ```
     GET /logs/:taskKey/:taskSecret
    ```
 
@@ -111,6 +111,8 @@ All services are containerized and orchestrated using Docker Compose, providing 
 The Docker Compose configurations are defined in [/infra-configs/docker-compose.core.yml](/infra-configs/docker-compose.core.yml) and [/infra-configs/docker-compose.logging.yml](/infra-configs/docker-compose.logging.yml).
 The related commands to manage these deployments can be found under the Infrastructure (infra-configs) Commands section in the project's [Makefile](/Makefile).
 
+Image Location: [Docker Hub Repository](https://hub.docker.com/r/mhmet/task-tracker)
+
 <img src="github/diagrams/docker-base-deployment-arch/docker-base-deployment-arch-v1.png" alt="Docker-Based Unified Deployment Architecture" width="1000" />
 
 ---
@@ -124,4 +126,4 @@ The related commands to manage these deployments can be found under the Infrastr
 ### API Reference (Swagger & Postman)
 
 - Swagger UI: <http://localhost:3000/swagger/index.html> (Ensure the app is running locally to access this.)
-- [Postman Workspace](https://www.postman.com/systemofadown/workspace/task-tracker/overview)
+- [Postman Workspace](https://www.postman.com/systemofadown/task-tracker/overview)
