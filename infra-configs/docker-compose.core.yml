@@ -15,7 +15,7 @@ services:
       - task-tracker-appnet
 
   app:
-    image: task-tracker:latest
+    image: mhmet/task-tracker:v1.0.0
     container_name: app
     depends_on:
       - pgdb
