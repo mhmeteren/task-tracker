@@ -1,5 +1,7 @@
 
-# Project Description
+[![Test and Deploy](https://github.com/mhmeteren/task-tracker/actions/workflows/test-and-publish.yml/badge.svg?branch=main)](https://github.com/mhmeteren/task-tracker/actions/workflows/test-and-publish.yml)
+
+# Overview
 
 This project is a lightweight **task tracker and action logging service** that allows users to log specific task executions via a simple HTTP GET request.  
 It is designed for easy integration with cron jobs, scripts, and other automated systems.
@@ -8,7 +10,6 @@ It is designed for easy integration with cron jobs, scripts, and other automated
 
 ## Chapters
 
-- [Project Description](#project-description)
 - [How It Works](#how-it-works)
 - [Example Use Cases](#example-use-cases)
 - [System Design](#system-design)
